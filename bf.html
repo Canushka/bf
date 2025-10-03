@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Boyfriend's Day! 💖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Playfair Display as Calibri fallback (optional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffe5f7 0%, #ffcfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Calibri', 'Playfair Display', serif;
+      overflow: hidden;
+    }
+
+    #greeting-dialog {
+      background: #fff0fa;
+      border-radius: 30px;
+      border: 4px solid #ff73b5;
+      max-width: 90vw;
+      box-shadow: 0 10px 40px #ffb5e0a8;
+      padding: 40px 32px 24px 32px;
+      text-align: center;
+      z-index: 2;
+      position: relative;
+      animation: pop-in 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+      display: none;
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0.6); opacity: 0; }
+      80% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    #greeting-dialog h1 {
+      color: #ff3c8b;
+      font-size: 2.5rem;
+      margin: 0 0 10px 0;
+      text-shadow: 0 2px 8px #ffd1e6;
+      font-family: inherit;
+      font-weight: 700;
+    }
+    #greeting-dialog p {
+      color: #ff73b5;
+      font-size: 1.3rem;
+      margin: 0 0 25px 0;
+      font-family: inherit;
+    }
+
+    #greeting-dialog button {
+      background: linear-gradient(90deg, #ff73b5 0%, #ffbae7 100%);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #ffc8e6b3;
+      transition: background 0.2s;
+    }
+    #greeting-dialog button:hover {
+      background: linear-gradient(90deg, #ffbae7 0%, #ff73b5 100%);
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+  <div id="greeting-dialog">
+    <h1 id="dialog-title"></h1>
+    <p id="dialog-msg"></p>
+    <button id="dialog-btn"></button>
+  </div>
+  <script>
+    // Messages for each dialog box
+    const messages = [
+      {
+        title: "💖 Happy Boyfriend's Day! 💖",
+        msg: "To my amazing boyfriend,<br>You make every day brighter and cuter!<br>Enjoy your special day! 🎉",
+        button: "Next"
+      },
+      {
+        title: "😍 You're the Best! 😍",
+        msg: "Thank you for always being there for me and making me smile.<br>You're my favorite person in the whole world! 🌎",
+        button: "Next"
+      },
+      {
+        title: "💌 I Appreciate You! 💌",
+        msg: "Every moment with you is precious.<br>I love how you make everything better just by being yourself. ✨",
+        button: "Next"
+      },
+      {
+        title: "🌈 My Heart Belongs to You 🌈",
+        msg: "You are my sunshine on rainy days and my comfort always.<br>I'm grateful for you every single day! ☀️",
+        button: "Next"
+      },
+      {
+        title: "🎉 Love You Always! 🎉",
+        msg: "Happy Boyfriend's Day again!<br>I hope your day is as wonderful as you are. 💕",
+        button: "Aww, thank you!"
+      }
+    ];
+
+    let currentMsg = 0;
+
+    function showDialog(idx) {
+      if (idx >= messages.length) {
+        document.getElementById('greeting-dialog').style.display = 'none';
+        return;
+      }
+      document.getElementById('dialog-title').innerHTML = messages[idx].title;
+      document.getElementById('dialog-msg').innerHTML = messages[idx].msg;
+      document.getElementById('dialog-btn').innerText = messages[idx].button;
+      document.getElementById('greeting-dialog').style.display = 'block';
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      showDialog(currentMsg);
+      document.getElementById('dialog-btn').onclick = function() {
+        currentMsg++;
+        showDialog(currentMsg);
+        confettiBurst(40); // More confetti pops on each click!
+      };
+    });
+
+    // Confetti code (simple, no libraries)
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let W = window.innerWidth, H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
+
+    const confettiColors = [
+      "#ff73b5", "#ff3c8b", "#ffbae7", "#fff0fa", "#ffcfe2", "#fff",
+      "#fe9fc2", "#ffd1e6"
+    ];
+    function randomFromArray(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    let confettiParticles = [];
+    function ConfettiParticle(x, y, burst) {
+      this.x = (typeof x === 'number') ? x : Math.random() * W;
+      this.y = (typeof y === 'number') ? y : Math.random() * -H;
+      this.r = Math.random() * 8 + 6;
+      this.d = Math.random() * 80 + 40;
+      this.color = randomFromArray(confettiColors);
+      this.tilt = Math.random() * 10 - 10;
+      this.tiltAngleIncremental = Math.random() * 0.06 + 0.04;
+      this.tiltAngle = 0;
+      this.opacity = Math.random() * 0.5 + 0.5;
+      // For burst, give a random direction and speed
+      if (burst) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 6 + 4;
+        this.burstVX = Math.cos(angle) * speed;
+        this.burstVY = Math.sin(angle) * speed - 5;
+        this.burstLife = 40 + Math.random() * 20;
+      }
+    }
+    ConfettiParticle.prototype.draw = function() {
+      ctx.beginPath();
+      ctx.lineWidth = this.r;
+      ctx.strokeStyle = this.color;
+      ctx.globalAlpha = this.opacity;
+      ctx.moveTo(this.x + this.tilt + this.r / 3, this.y);
+      ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.r / 3);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    };
+
+    function addConfettiParticles(count) {
+      for(let i=0;i<count;i++) confettiParticles.push(new ConfettiParticle());
+    }
+    addConfettiParticles(120);
+
+    function confettiBurst(count) {
+      // Pop a burst at the center of the dialog
+      const dialog = document.getElementById('greeting-dialog');
+      const rect = dialog.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      for(let i=0;i<count;i++) confettiParticles.push(new ConfettiParticle(x, y, true));
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(let i=0;i<confettiParticles.length;i++) {
+        confettiParticles[i].draw();
+      }
+      updateConfetti();
+    }
+    function updateConfetti() {
+      for(let i=confettiParticles.length-1;i>=0;i--) {
+        let p = confettiParticles[i];
+        if (typeof p.burstVX !== 'undefined') {
+          // Burst particles
+          p.x += p.burstVX;
+          p.y += p.burstVY;
+          p.burstVY += 0.3; // gravity
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.tilt = Math.sin(p.tiltAngle) * 16;
+          p.burstLife--;
+          if (p.burstLife <= 0 || p.y > H+20) {
+            confettiParticles.splice(i,1);
+          }
+        } else {
+          // Normal slow-fall particles
+          p.y += (Math.cos(p.d) + 3 + p.r/2) * 0.7;
+          p.x += Math.sin(0.01 * p.d);
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.tilt = Math.sin(p.tiltAngle) * 16;
+
+          // If out of screen, respawn at top
+          if (p.y > H+20) {
+            p.x = Math.random()*W;
+            p.y = -10;
+          }
+        }
+      }
+    }
+    function animateConfetti() {
+      drawConfetti();
+      requestAnimationFrame(animateConfetti);
+    }
+    animateConfetti();
+
+    // Responsive resize
+    window.addEventListener('resize', () => {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W; canvas.height = H;
+    });
+  </script>
+</body>
+</html>
